@@ -1,0 +1,87 @@
+// src/config/database.js
+const mysql = require('mysql2');
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'your_password',
+  database: 'user_management'
+});
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    return;
+  }
+  console.log('Connected to MySQL database');
+});
+
+module.exports = connection;
+
+// src/models/user.js
+const db = require('../config/database');
+
+class User {
+  static getAllUsers() {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM users', (err, results) => {
+        if (err) reject(err);
+        resolve(results);
+      });
+    });
+  }
+
+  static createUser(user) {
+    return new Promise((resolve, reject) => {
+      db.query('INSERT INTO users (name, email) VALUES (?, ?)', 
+        [user.name, user.email], 
+        (err, result) => {
+          if (err) reject(err);
+          resolve(result);
+        });
+    });
+  }
+}
+
+module.exports = User;
+
+// src/routes/users.js
+const express = require('express');
+const router = express.Router();
+const User = require('../models/user');
+
+router.get('/', async (req, res) => {
+  try {
+    const users = await User.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const result = await User.createUser(req.body);
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;
+
+// src/app.js
+const express = require('express');
+const cors = require('cors');
+const userRoutes = require('./routes/users');
+
+const app = express();
+const port = 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use('/api/users', userRoutes);
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
