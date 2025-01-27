@@ -1,0 +1,135 @@
+// src/app/models/user.ts
+export interface User {
+  id?: number;
+  name: string;
+  email: string;
+}
+
+// src/app/services/user.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { User } from '../models/user';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+  private apiUrl = 'http://localhost:3000/api/users';
+
+  constructor(private http: HttpClient) { }
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrl);
+  }
+
+  createUser(user: User): Observable<any> {
+    return this.http.post(this.apiUrl, user);
+  }
+}
+
+// src/app/components/user-list/user-list.component.ts
+import { Component, OnInit } from '@angular/core';
+import { User } from '../../models/user';
+import { UserService } from '../../services/user.service';
+
+@Component({
+  selector: 'app-user-list',
+  templateUrl: './user-list.component.html',
+  styleUrls: ['./user-list.component.css']
+})
+export class UserListComponent implements OnInit {
+  users: User[] = [];
+  newUser: User = { name: '', email: '' };
+
+  constructor(private userService: UserService) { }
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.userService.getUsers()
+      .subscribe(users => this.users = users);
+  }
+
+  onSubmit(): void {
+    this.userService.createUser(this.newUser)
+      .subscribe(() => {
+        this.loadUsers();
+        this.newUser = { name: '', email: '' };
+      });
+  }
+}
+
+// src/app/components/user-list/user-list.component.html
+<div class="container mt-4">
+  <h2>User Management</h2>
+
+  <!-- Add User Form -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h3>Add New User</h3>
+      <form (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name:</label>
+          <input type="text" class="form-control" id="name" 
+                 [(ngModel)]="newUser.name" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input type="email" class="form-control" id="email" 
+                 [(ngModel)]="newUser.email" name="email" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add User</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- User List -->
+  <div class="card">
+    <div class="card-body">
+      <h3>Users</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{user.id}}</td>
+            <td>{{user.name}}</td>
+            <td>{{user.email}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+// src/app/app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+import { UserListComponent } from './components/user-list/user-list.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    UserListComponent
+  ],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
