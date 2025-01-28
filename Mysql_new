@@ -1,0 +1,23 @@
+-- Secure MySQL installation
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_secure_password';
+FLUSH PRIVILEGES;
+
+-- Create application database and user
+CREATE DATABASE user_management;
+CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'app_password';
+GRANT ALL PRIVILEGES ON user_management.* TO 'app_user'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Create users table
+USE user_management;
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert sample data
+INSERT INTO users (name, email) VALUES
+    ('John Doe', 'john@example.com'),
+    ('Jane Smith', 'jane@example.com');
