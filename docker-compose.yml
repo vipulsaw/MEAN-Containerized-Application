@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - API_URL=http://backend:3000/api
+    networks:
+      - mean-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=user_logs-mysql-1
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=hws
+    depends_on:
+      - mysql
+    networks:
+      - mean-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./mysql/.env
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - mean-network
+
+volumes:
+  mysql-data:
+
+networks:
+  mean-network:
+    driver: bridge
