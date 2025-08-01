@@ -186,6 +186,7 @@ Before you begin, make sure you have the following installed:
 4. Open the `.env` file and add your MySQL configuration:
 
    ```
+   DB_HOST=mysql
    MYSQL_HOST=mysql
    MYSQL_USER=your_username
    MYSQL_PASSWORD=your_password
