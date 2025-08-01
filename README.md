@@ -199,6 +199,7 @@ Before you begin, make sure you have the following installed:
 
    ```bash
    docker-compose up --build
+   docker-compose up -d
    ```
 
 
@@ -219,11 +220,11 @@ docker-compose stop
 
 - First create a docker image from Dockerfile
 ```bash
-docker build -t praysap/user-backend:latest .
+docker build -t vipulsaw123/backend-mean:latest .
 ```
 
 ```bash
-docker build -t praysap/user-frontend:latest .
+docker build -t vipulsaw123/frontend-mean:latest .
 ```
 
 - To pull the official MySQL 8.0 image from Docker Hub.
