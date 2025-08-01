@@ -224,7 +224,14 @@ docker build -t vipulsaw123/backend-mean:latest .
 ```
 
 ```bash
+docker push vipulsaw123/backend-mean:latest 
+```
+
+```bash
 docker build -t vipulsaw123/frontend-mean:latest .
+```
+```bash
+docker push vipulsaw123/frontend-mean:latest 
 ```
 
 - To pull the official MySQL 8.0 image from Docker Hub.
@@ -261,7 +268,7 @@ docker run -d
  -e MYSQL_PASSWORD=root 
  -e MYSQL_DB=hws 
  -p 3000:3000 
- praysap/user-backend:latest
+ vipulsaw123/backend-mean:latest
 
 ```
 
@@ -273,7 +280,7 @@ docker run -d
  --network=threetier 
  -e API_URL="http://3.91.227.132:3000" 
  -p 80:80 
- praysap/user-frontend:latest
+ vipulsaw123/frontend-mean:latest
 
 ```
 
