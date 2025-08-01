@@ -1,29 +1,43 @@
-# Stage 1: Build Angular app
-FROM node:18 as build
+# Stage 1: Build the React app
+FROM node:18-alpine AS build
+
+# Set working directory
 WORKDIR /app
+
+# Accept build-time environment variable
+#ARG REACT_APP_API_BASE_URL
+#ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
+# Copy and install dependencies
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install --force
+
+# Copy the entire app source
 COPY . .
-RUN npm run build 
 
-# Stage 2: Serve with Apache
-#FROM httpd:2.4
-#COPY --from=build /app/dist/demo /usr/local/apache2/htdocs/
-#COPY ./apache-config.conf /usr/local/apache2/conf/extra/httpd-vhosts.conf
-#RUN echo "Include /usr/local/apache2/conf/extra/httpd-vhosts.conf" >> /usr/local/apache2/conf/httpd.conf
-#EXPOSE 80
+# Build the React app
+RUN npm run build
+
+# Stage 2: Serve the build using Nginx
+FROM nginx:alpine
+
+# Remove the default Nginx HTML files
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy build output from previous stage
+#COPY --from=build /app/build /usr/share/nginx/html
+
+COPY --from=build /app/dist/demo /usr/share/nginx/html
+
+# Copy custom Nginx config
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 
-# Stage 2: Serve with Apache
-FROM httpd:2.4
-
-# Enable proxy modules
-RUN sed -i '/LoadModule proxy_module/s/^#//g' /usr/local/apache2/conf/httpd.conf && \
-    sed -i '/LoadModule proxy_http_module/s/^#//g' /usr/local/apache2/conf/httpd.conf && \
-    sed -i '/LoadModule proxy_connect_module/s/^#//g' /usr/local/apache2/conf/httpd.conf
-
-COPY --from=build /app/dist/demo /usr/local/apache2/htdocs/
-COPY ./apache-config.conf /usr/local/apache2/conf/extra/httpd-vhosts.conf
-RUN echo "Include /usr/local/apache2/conf/extra/httpd-vhosts.conf" >> /usr/local/apache2/conf/httpd.conf
-
+# Expose port 80
 EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
+

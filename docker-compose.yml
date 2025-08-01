@@ -1,45 +1,43 @@
-version: '3.8'
 
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
     environment:
-      - API_URL=http://backend:3000/api
+      MYSQL_DATABASE: hws
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
     networks:
-      - mean-network
+      - threetier
 
-  backend:
-    build: ./backend
+  user-backend:
+    image: vipulsaw123/backend-mean:latest
+    container_name: user-backend
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: hws
     ports:
       - "3000:3000"
-    environment:
-      - DB_HOST=user_logs-mysql-1
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=hws
     depends_on:
       - mysql
     networks:
-      - mean-network
+      - threetier
 
-  mysql:
-    image: mysql:8.0
+  user-frontend:
+    image: vipulsaw123/frontend-mean:latest
+    container_name: user-frontend
+    environment:
+      API_URL: "http://127.0.0.1:3000"
     ports:
-      - "3306:3306"
-    env_file:
-      - ./mysql/.env
-    volumes:
-      - mysql-data:/var/lib/mysql
+      - "80:80"
+    depends_on:
+      - user-backend
     networks:
-      - mean-network
-
-volumes:
-  mysql-data:
+      - threetier
 
 networks:
-  mean-network:
-    driver: bridge
+  threetier:
+    name: threetier
